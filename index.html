@@ -829,11 +829,14 @@ const LEVELS = { E: "Easy", M: "Medium", H: "Hard" };
 const level = (reelId, lib, q) => (DIFF[reelId] && DIFF[reelId][lib] && DIFF[reelId][lib][q]) || "H";
 const LIB_LOOK = { bolly: ["BOL", "#f2a71b", "Hindi cinema, from the classics to this year's hits."], film: ["HOL", "#e0306e", "Blockbusters, Oscar winners and family favourites."], tv: ["TV", "#d9b9a6", "Sitcoms, dramas and the shows everyone binged."] };
 const KEY = "bolly-games-v4";
+const DEFAULT_TEAMS = ["Team Chai", "Team Samosa", "Popcorn Gang", "Couch Champions"];
 let S = load() || fresh();
+// Saves made before the new defaults still hold the old three untouched teams: give them the new line-up.
+if (S && S.view === "setup" && Array.isArray(S.teams) && S.teams.map(t => t.name).join("|") === "Team Chai|Team Samosa|Team Popcorn" && S.teams.every(t => !t.score)) S.teams = DEFAULT_TEAMS.map(n => ({ name: n, score: 0 }));
 let tick = null, left = 0;
 
 function fresh() {
-  return { view: "setup", teams: ["Team Chai", "Team Samosa", "Team Popcorn"].map(n => ({ name: n, score: 0 })),
+  return { view: "setup", teams: DEFAULT_TEAMS.map(n => ({ name: n, score: 0 })),
     libs: LIBS.map(l => l.id), reels: REELS.map(r => r.id), per: 4, timer: 0, queue: [], idx: 0, revealed: false, awarded: [] };
 }
 function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
