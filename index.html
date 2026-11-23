@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a0c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bolly Games">
 <meta name="description" content="Anuj's Bolly Games: a Bollywood and Hollywood quiz for teams on one shared screen.">
 <title>Anuj's Bolly Games</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -304,6 +309,62 @@ body { position: relative; }
 .dd-kicker { font-size: 13px; letter-spacing: .2em; text-transform: uppercase; font-weight: 800; color: #8a3a4c; }
 .dd-title { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(48px, 10vw, 88px); line-height: 1; color: var(--rani); }
 .reel-opt.locked { cursor: default; }
+
+/* ===== TV mode: the whole game fits one 16:9 screen (phone mirrored to a TV, or a phone held sideways).
+   Sizes follow the screen (vmin) so text grows with the display instead of the page scrolling. ===== */
+body.tvm { overflow: hidden; }
+body.tvm .wall, body.tvm .wrap > .bulbs, body.tvm .logo small { display: none; }
+body.tvm .wrap { max-width: none; height: 100vh; height: 100dvh; grid-template-rows: auto minmax(0, 1fr); gap: 1.2vmin;
+  padding-block: max(6px, env(safe-area-inset-top, 0px)) max(6px, env(safe-area-inset-bottom, 0px)); }
+body.tvm header { flex-wrap: nowrap; }
+body.tvm .logo { font-size: clamp(18px, 4.4vmin, 48px); }
+body.tvm .head-btns .btn { font-size: clamp(12px, 2.2vmin, 22px); padding: .35em .8em; }
+body.tvm main#app { min-height: 0; display: block; }
+body.tvm .play { height: 100%; grid-template-columns: minmax(0, 1fr) clamp(150px, 24vw, 420px); grid-template-rows: minmax(0, 1fr); align-items: stretch; gap: 1.6vmin; }
+body.tvm .screen { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: clamp(10px, 2.6vmin, 44px); gap: 1.6vmin; border-width: clamp(8px, 1.6vmin, 16px); align-content: center; }
+body.tvm .meta { font-size: clamp(10px, 1.9vmin, 22px); }
+body.tvm .reel-name { font-size: clamp(20px, 6vmin, 76px); }
+body.tvm .rule { font-size: clamp(12px, 2.5vmin, 28px); margin: 0; }
+body.tvm .q { font-size: clamp(18px, 5.4vmin, 68px); }
+body.tvm .q.emoji { font-size: clamp(34px, 12vmin, 150px); }
+body.tvm .clues li { font-size: clamp(15px, 4vmin, 50px); }
+body.tvm .clues li span, body.tvm .answer .label, body.tvm .award-label { font-size: clamp(10px, 1.8vmin, 20px); }
+body.tvm .answer { padding-top: 1.2vmin; }
+body.tvm .answer .a { font-size: clamp(22px, 7vmin, 86px); }
+body.tvm .answer .note { font-size: clamp(12px, 2.4vmin, 28px); }
+body.tvm .controls .btn, body.tvm .award-btns button, body.tvm .jpick, body.tvm .jmark { font-size: clamp(13px, 2.6vmin, 30px); padding: .45em 1em; }
+body.tvm .timer { font-size: clamp(18px, 5vmin, 60px); }
+body.tvm aside.board { min-height: 0; overflow-y: auto; align-content: start; gap: 1vmin; padding: 0 8px; }
+body.tvm .board h3 { font-size: clamp(10px, 1.8vmin, 20px); }
+body.tvm .stub { padding: .5vmin 1.4vmin; gap: 1vmin; }
+body.tvm .stub .n { font-size: clamp(13px, 2.8vmin, 34px); line-height: 1.15; }
+body.tvm .stub .seat { font-size: clamp(9px, 1.5vmin, 18px); }
+body.tvm .stub .s { font-size: clamp(20px, 5.4vmin, 66px); line-height: 1.1; }
+body.tvm .side-actions .btn { font-size: clamp(11px, 2vmin, 22px); padding: .4em .7em; }
+/* Jeopardy board fills the screen too */
+body.tvm .jwrap { height: 100%; grid-template-rows: auto minmax(0, 1fr); }
+body.tvm .jscroll { min-height: 0; overflow: auto; padding: 1vmin; }
+body.tvm .jboard, body.tvm .play.wide .jboard { min-width: 0; height: 100%; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: .8vmin; padding: .8vmin; }
+body.tvm .jcat { min-height: 0; font-size: clamp(8px, 1.7vmin, 22px); padding: .4vmin; overflow-wrap: anywhere; letter-spacing: 0; }
+body.tvm .jtile, body.tvm .jtile.empty { min-height: 0; font-size: clamp(16px, 5.4vmin, 64px); }
+body.tvm .jmeta { font-size: clamp(10px, 1.8vmin, 20px); }
+body.tvm .play.wide { grid-template-columns: minmax(0, 1fr) clamp(150px, 24vw, 420px); }
+body.tvm .play.wide aside.board { display: grid; grid-template-columns: minmax(0, 1fr); }
+/* End and pause screens: centre them in the frame */
+body.tvm .end, body.tvm .paused { height: 100%; overflow-y: auto; align-content: center; padding-block: 1vmin; gap: 1.6vmin; }
+body.tvm .end h2 { font-size: clamp(30px, 11vmin, 130px); }
+body.tvm .end .final, body.tvm .paused .final { width: min(100%, 70vmin); }
+/* Portrait phone in TV mode: question on top, scores in a strip underneath */
+@media (orientation: portrait) {
+  body.tvm .play, body.tvm .play.wide { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  body.tvm aside.board { max-height: 34vh; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body.tvm aside.board > h3, body.tvm aside.board > .progress, body.tvm .side-actions { grid-column: 1 / -1; }
+  body.tvm .side-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body.tvm .side-actions .pause-row { display: contents; }
+}
+body.tvm .head-btns .btn { white-space: nowrap; }
+body.tvm .jwrap .hint, body.tvm .jwrap > p { font-size: clamp(10px, 1.9vmin, 22px); margin: 0; }
+#tv[aria-pressed=true] { background: var(--marigold); color: var(--ink); }
 </style>
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -320,7 +381,7 @@ body { position: relative; }
   <div class="bulbs" aria-hidden="true"></div>
   <header>
     <div class="logo"><span class="lg-a">Anuj's</span> <span class="lg-b">Bolly Games</span><small>Bollywood &amp; Hollywood quiz night</small></div>
-    <div class="head-btns"><button class="btn ghost" id="home" type="button">Home</button><button class="btn ghost" id="fs" type="button">Fullscreen</button></div>
+    <div class="head-btns"><button class="btn ghost" id="home" type="button">Home</button><button class="btn ghost" id="tv" type="button" aria-pressed="false" title="Fit the game to one screen with big text, for a TV or a phone">TV mode</button><button class="btn ghost" id="fs" type="button">Fullscreen</button></div>
   </header>
   <main id="app"></main>
   <div class="bulbs" aria-hidden="true"></div>
@@ -898,7 +959,7 @@ function render() {
     app.innerHTML = pausedHTML();
     $("unpause").onclick = () => { S.paused = false; render(); };
     $("saveExit").onclick = saveAndExit;
-    save(); return;
+    applyTV(); save(); return;
   }
   if (S.view === "setup") app.innerHTML = savedHTML() + setupHTML();
   else if (S.view === "play") app.innerHTML = playHTML();
@@ -906,6 +967,7 @@ function render() {
   else if (S.view === "clue") app.innerHTML = clueHTML();
   else app.innerHTML = endHTML();
   bind();
+  applyTV();
   if ($("pause")) $("pause").onclick = pauseGame;
   if ($("saveExit")) $("saveExit").onclick = saveAndExit;
   if ($("resumeSaved")) $("resumeSaved").onclick = resumeSaved;
@@ -1310,6 +1372,18 @@ function bindBoard(on) {
 $("home").onclick = goHome;
 document.querySelector(".logo").onclick = goHome;
 
+// TV mode: on when the host turns it on, and on its own for a phone held sideways during a game.
+const shortLandscape = matchMedia("(orientation: landscape) and (max-height: 540px)");
+function applyTV() {
+  const inGame = S.view !== "setup";
+  const on = S.tv === true || (S.tv !== false && shortLandscape.matches);
+  document.body.classList.toggle("tvm", inGame && on);
+  $("tv").setAttribute("aria-pressed", on);
+}
+$("tv").onclick = () => { const on = $("tv").getAttribute("aria-pressed") === "true"; S.tv = !on; save(); applyTV(); };
+shortLandscape.addEventListener ? shortLandscape.addEventListener("change", applyTV) : shortLandscape.addListener(applyTV);
+// iPhone Safari has no page fullscreen, so hide that button there (Add to Home Screen gives full screen instead).
+if (!document.documentElement.requestFullscreen) $("fs").hidden = true;
 $("fs").onclick = () => {
   try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); } catch {}
 };
