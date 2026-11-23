@@ -69,7 +69,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .teams { display: grid; gap: 8px; }
 .team-row { display: flex; gap: 8px; }
 .team-row input { flex: 1; min-width: 0; }
-input[type=text], select { background: var(--velvet); color: var(--screen); border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; font: inherit; }
+input[type=text], input[type=number], select { background: var(--velvet); color: var(--screen); border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; font: inherit; }
 .x { background: transparent; color: var(--muted); width: 40px; font-size: 20px; }
 .x:hover { color: var(--rani); }
 .reels { display: grid; gap: 6px; }
@@ -81,6 +81,8 @@ input[type=text], select { background: var(--velvet); color: var(--screen); bord
 .reel-opt.soon { opacity: .55; cursor: default; }
 .reel-opt .tot { font-style: normal; color: var(--marigold); font-weight: 600; }
 .opts { display: flex; gap: 12px; flex-wrap: wrap; }
+.opts label[hidden] { display: none; }
+#per-n { width: 7em; }
 .opts label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 600; }
 .start { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: space-between; grid-column: 1 / -1; }
 .start .btn { font-size: 20px; padding: 14px 28px; }
@@ -842,6 +844,7 @@ const reel = id => REELS.find(r => r.id === id);
 const $ = id => document.getElementById(id);
 const avail = id => S.libs.reduce((n, l) => n + reel(id).qs[l].length, 0);
 const activeReels = () => S.reels.filter(id => per(id) > 0);
+const maxPer = () => Math.max(1, ...S.reels.map(avail));
 const per = id => S.per === 0 ? avail(id) : Math.min(S.per, avail(id));
 
 const GAME_KEYS = ["teams", "libs", "reels", "per", "timer", "mode", "queue", "idx", "revealed", "clue", "awarded", "board", "cell", "marks", "ddShown", "ans", "control", "view", "left"];
@@ -1010,7 +1013,9 @@ function setupHTML() {
       ${board ? `<p class="hint">Jeopardy scoring: a right answer wins the tile's points and a wrong answer loses them. If a team misses, another team can steal.</p>` : ""}
       <div class="opts" ${board ? "hidden" : ""}>
         <label for="per">Questions per round
-          <select id="per">${[[3, "3"], [4, "4"], [5, "5"], [0, "All"]].map(([v, l]) => `<option value="${v}" ${S.per === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+          <select id="per">${[[3, "3"], [4, "4"], [5, "5"], [0, "All"]].map(([v, l]) => `<option value="${v}" ${S.per === v ? "selected" : ""}>${l}</option>`).join("")}<option value="custom" ${[0, 3, 4, 5].includes(S.per) ? "" : "selected"}>Custom</option></select></label>
+        <label for="per-n" ${[0, 3, 4, 5].includes(S.per) ? "hidden" : ""} id="per-n-wrap">How many?
+          <input type="number" id="per-n" min="1" max="${maxPer()}" step="1" inputmode="numeric" value="${[0, 3, 4, 5].includes(S.per) ? 6 : S.per}"></label>
       </div>
     </section>
     <div class="start">
@@ -1093,7 +1098,11 @@ function bind() {
       S.reels = REELS.map(r => r.id).filter(id => $("reel-" + id).checked || (S.mode !== "board" && id === "final")); count(); save(); });
     document.querySelectorAll("[data-lib]").forEach(cb => cb.onchange = () => {
       sync(); S.libs = LIBS.map(l => l.id).filter(id => $("lib-" + id).checked); render(); });
-    $("per").onchange = e => { S.per = +e.target.value; count(); save(); };
+    const setCustom = () => { const n = Math.round(+$("per-n").value); if (n >= 1) { S.per = Math.min(n, maxPer()); count(); save(); } };
+    $("per").onchange = e => { const c = e.target.value === "custom"; $("per-n-wrap").hidden = !c;
+      if (c) { $("per-n").max = maxPer(); setCustom(); $("per-n").focus(); } else { S.per = +e.target.value; count(); save(); } };
+    $("per-n").oninput = setCustom;
+    $("per-n").onchange = () => { setCustom(); $("per-n").value = S.per; };
     document.querySelectorAll("[data-timer]").forEach(b => b.onclick = () => {
       S.timer = +b.dataset.timer; save();
       document.querySelectorAll("[data-timer]").forEach(x => x.setAttribute("aria-checked", x === b)); });
