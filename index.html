@@ -364,7 +364,15 @@ body.tvm .end .final, body.tvm .paused .final { width: min(100%, 70vmin); }
 }
 body.tvm .head-btns .btn { white-space: nowrap; }
 body.tvm .jwrap .hint, body.tvm .jwrap > p { font-size: clamp(10px, 1.9vmin, 22px); margin: 0; }
-#tv[aria-pressed=true] { background: var(--marigold); color: var(--ink); }
+/* iPhone full-screen view: no header or decorations, just a small exit button in the corner */
+body.fsx .wall, body.fsx .wrap > .bulbs, body.fsx .logo, body.fsx #home, body.fsx #tv { display: none; }
+body.fsx header { position: fixed; z-index: 20; top: max(6px, env(safe-area-inset-top, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); }
+body.fsx #fs { font-size: 12px; padding: 4px 10px; background: rgba(42,12,20,.85); color: var(--marigold); box-shadow: inset 0 0 0 2px var(--marigold); }
+body.fsx.tvm .wrap { grid-template-rows: minmax(0, 1fr); }
+body.fsx .play aside.board { padding-top: 34px; }
+.fs-tip { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 10px 14px; border-radius: 10px; background: var(--velvet-2); box-shadow: inset 0 0 0 2px var(--marigold); font-size: 15px; }
+body.fsx .fs-tip { position: fixed; z-index: 30; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom, 0px)); box-shadow: inset 0 0 0 2px var(--marigold), 0 10px 30px rgba(0,0,0,.6); }
+#fs[aria-pressed=true], #tv[aria-pressed=true] { background: var(--marigold); color: var(--ink); }
 </style>
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -381,8 +389,9 @@ body.tvm .jwrap .hint, body.tvm .jwrap > p { font-size: clamp(10px, 1.9vmin, 22p
   <div class="bulbs" aria-hidden="true"></div>
   <header>
     <div class="logo"><span class="lg-a">Anuj's</span> <span class="lg-b">Bolly Games</span><small>Bollywood &amp; Hollywood quiz night</small></div>
-    <div class="head-btns"><button class="btn ghost" id="home" type="button">Home</button><button class="btn ghost" id="tv" type="button" aria-pressed="false" title="Fit the game to one screen with big text, for a TV or a phone">TV mode</button><button class="btn ghost" id="fs" type="button">Fullscreen</button></div>
+    <div class="head-btns"><button class="btn ghost" id="home" type="button">Home</button><button class="btn ghost" id="tv" type="button" aria-pressed="false" title="Fit the game to one screen with big text, for a TV or a phone">TV mode</button><button class="btn ghost" id="fs" type="button" aria-pressed="false">Full screen</button></div>
   </header>
+  <div class="fs-tip" id="fsTip" hidden><span>For true full screen on iPhone, tap <b>Share</b> in Safari, then <b>Add to Home Screen</b>, and open the game from that icon.</span><button class="btn ghost" id="fsTipClose" type="button">OK</button></div>
   <main id="app"></main>
   <div class="bulbs" aria-hidden="true"></div>
 </div>
@@ -1383,10 +1392,36 @@ function applyTV() {
 $("tv").onclick = () => { const on = $("tv").getAttribute("aria-pressed") === "true"; S.tv = !on; save(); applyTV(); };
 shortLandscape.addEventListener ? shortLandscape.addEventListener("change", applyTV) : shortLandscape.addListener(applyTV);
 // iPhone Safari has no page fullscreen, so hide that button there (Add to Home Screen gives full screen instead).
-if (!document.documentElement.requestFullscreen) $("fs").hidden = true;
+// Fullscreen: the real browser fullscreen where it exists (desktop, Android, iPad).
+// iPhone Safari has none, so there the button switches to a clean full-screen view (no header or decorations)
+// and points to Add to Home Screen, which hides Safari's own bars.
+const docEl = document.documentElement;
+const canFS = !!(docEl.requestFullscreen || docEl.webkitRequestFullscreen);
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+const standalone = navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+function fsLabel() {
+  const on = !!fsEl() || document.body.classList.contains("fsx");
+  $("fs").textContent = on ? "Exit full screen" : "Full screen";
+  $("fs").setAttribute("aria-pressed", on);
+}
+document.addEventListener("fullscreenchange", fsLabel);
+document.addEventListener("webkitfullscreenchange", fsLabel);
 $("fs").onclick = () => {
-  try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); } catch {}
+  if (canFS) {
+    try {
+      if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      else { const r = (docEl.requestFullscreen || docEl.webkitRequestFullscreen).call(docEl); if (r && r.catch) r.catch(() => {}); }
+    } catch {}
+  } else {
+    const on = document.body.classList.toggle("fsx");
+    window.scrollTo(0, 0);
+    const tip = $("fsTip");
+    if (tip) tip.hidden = !on || standalone;
+  }
+  fsLabel();
 };
+fsLabel();
+$("fsTipClose").onclick = () => { $("fsTip").hidden = true; };
 
 if (!S.teams || !S.view) S = fresh();
 {
